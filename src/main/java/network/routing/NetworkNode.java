@@ -7,5 +7,4 @@ public interface NetworkNode {
     void receive(Packet packet);
     void connectToNetwork(Network network);
     Destination getDestination();
-    String hash(String message);
 }

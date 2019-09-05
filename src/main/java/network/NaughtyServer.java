@@ -21,7 +21,6 @@ public class NaughtyServer implements NetworkNode {
         System.out.println("***");
         Packet nastyPacket = new Packet(nastyMessage, Destination.BOB, packet.mac);
         network.takePacket(nastyPacket);
-
     }
 
     @Override
@@ -33,10 +32,5 @@ public class NaughtyServer implements NetworkNode {
     @Override
     public Destination getDestination() {
         return Destination.BAD_GUY;
-    }
-
-    @Override
-    public String hash(String message) {
-        return null;
     }
 }

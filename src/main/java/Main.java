@@ -11,22 +11,16 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Starting...");
 
-        try {
-            messageDigest = MessageDigest.getInstance("SHA-1");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-
-        macExample();
-//        lengthExtensionAttackExample();
+//        macExample();
+        lengthExtensionAttackExample();
 //        hmacExample();
     }
 
     private static void macExample() {
         Network network = new Network();
 
-        Alice alice = new Alice(messageDigest);
-        Bob bob = new Bob(messageDigest);
+        Alice alice = new Alice();
+        Bob bob = new Bob();
         NaughtyServer naughtyServer = new NaughtyServer();
 
         alice.connectToNetwork(network);
@@ -37,7 +31,17 @@ public class Main {
     }
 
     private static void lengthExtensionAttackExample() {
+        Network network = new Network();
 
+        Alice alice = new Alice();
+        Bob bob = new Bob();
+        EvilServer evilServer = new EvilServer();
+
+        alice.connectToNetwork(network);
+        bob.connectToNetwork(network);
+        evilServer.connectToNetwork(network);
+
+        alice.sendMessage("Good work today Bob, thanks for helping out.", Destination.BOB);
     }
 
     private static void hmacExample() {
