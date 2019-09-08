@@ -1,7 +1,6 @@
 package hashing;
 
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,45 +37,12 @@ public class SHA1 {
     }
 
     /**
-     * Append some data to the message to be hashed.
-     *
-     * @param data the data to add
-     */
-    public void update(byte[] data) {
-        inputDataList.add(data);
-    }
-
-    /**
-     * Return the SHA-1 hash of all of the data added using the
-     * {@link #update(byte[])} method.
-     *
-     * @return SHA-1 hash of all data added with the update method
-     */
-    public byte[] digest() {
-        // Combine all chunks into a single array
-        int totalNumBytes = 0;
-        for (byte[] chunk : inputDataList) {
-            totalNumBytes += chunk.length;
-        }
-        byte[] allData = new byte[totalNumBytes];
-        int off = 0;
-        for (byte[] chunk : inputDataList) {
-            System.arraycopy(chunk, 0, allData, off, chunk.length);
-            off += chunk.length;
-        }
-
-        return digest(allData);
-    }
-
-    /**
      * Take an array of bytes and return its SHA-1 hash as bytes.
-     * Any data added to this object using the {@link #update(byte[])} method
-     * is ignored.
      *
      * @param x the data to hash
      * @return the SHA-1 hash of the data
      */
-    public byte[] digest(byte[] x) {
+    public byte[] digest(byte[] x, int messageLengthInBits) {
 
         // Convert a string to a sequence of 16-word blocks, stored as an array.
         // Append padding bits and the length, as described in the SHA1 standard
@@ -84,22 +50,18 @@ public class SHA1 {
         int[] blks = new int[(((x.length + 8) >> 6) + 1) * 16];
         int i;
 
-        for (i = 0; i < x.length; i++) {
-            blks[i >> 2] |= x[i] << (24 - (i % 4) * 8);
+        for (i = 0; i < blks.length; i++) {
+            try {
+                blks[i] = new BigInteger(Arrays.copyOfRange(x, i * 4, ((i + 1) * 4))).intValue();
+            } catch (ArrayIndexOutOfBoundsException e) {
+                blks[i] = 0;
+                break;
+            }
         }
 
-        blks[i >> 2] |= 0x80 << (24 - (i % 4) * 8);
-        blks[blks.length - 1] = x.length * 8;
-
-        System.out.println("BLOCKS");
-        ByteBuffer byteBuffer = ByteBuffer.allocate(2048);
-        for (int n : blks) {
-            byteBuffer.putInt(n);
-        }
-        System.out.println(Arrays.toString(byteBuffer.array()));
+        blks[blks.length - 1] = messageLengthInBits;
 
         // calculate 160 bit SHA1 hash of the sequence of blocks
-
         int[] w = new int[80];
 
         for (i = 0; i < blks.length; i += 16) {

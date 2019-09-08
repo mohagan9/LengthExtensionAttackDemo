@@ -13,14 +13,14 @@ public class Alice implements NetworkNode {
 
     public void sendMessage(String message, Destination destination) {
         System.out.println("***");
-        System.out.println("ALICE SAYS:");
+        System.out.println("ALICE:");
         System.out.println("Sending message onto the network...");
         System.out.println("***");
         network.takePacket(new Packet(message, destination, hash(SECRET_KEY + message)));
     }
 
     private byte[] hash(String secretWithMessage) {
-        return new SHA1().digest(secretWithMessage.getBytes());
+        return new SHA1().digest(secretWithMessage.getBytes(), secretWithMessage.length() * 8);
     }
 
     @Override

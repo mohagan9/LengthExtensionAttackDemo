@@ -4,11 +4,8 @@ import hashing.SHA1;
 import network.routing.Destination;
 import network.routing.NetworkNode;
 import org.apache.commons.lang3.ArrayUtils;
-import org.joou.UByte;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.security.MessageDigest;
 import java.util.Arrays;
 
 public class EvilServer implements NetworkNode {
@@ -20,21 +17,23 @@ public class EvilServer implements NetworkNode {
     public void receive(Packet packet) {
         System.out.println("***");
 
-        System.out.println("EVIL SERVER SAYS:");
+        System.out.println("EVIL SERVER:");
         System.out.println("Received Message: " + packet.message);
 
         int originalMessageLengthInBits = (packet.message.length() + SECRET_LENGTH) * 8;
 
-        String nastyMessage = "At least that's what I would say, if you weren't such an idiot! GO TO HELL BOB!";
+        String nastyMessage = "\nAt least that's what I would say, if you weren't such an idiot! GO TO HELL BOB!";
         System.out.println("Appending malicious content to the existing message...");
-        packet.message += nastyMessage;
+
+        byte[] prePaddedNastyMessage = pad(nastyMessage.getBytes(), originalMessageLengthInBits);
+        byte[] message = ArrayUtils.addAll(packet.message.getBytes(), prePaddedNastyMessage);
 
         System.out.println("Spoofing the MAC...");
-        packet.mac = generateNewMac(packet.mac, nastyMessage, originalMessageLengthInBits);
+        packet.mac = generateNewMac(packet.mac, nastyMessage.getBytes(), originalMessageLengthInBits);
 
         System.out.println("Sending tampered message to Bob...");
         System.out.println("***");
-        Packet evilPacket = new Packet(packet.message, Destination.BOB, packet.mac);
+        Packet evilPacket = new Packet(new String(message), Destination.BOB, packet.mac);
         network.takePacket(evilPacket);
     }
 
@@ -49,27 +48,30 @@ public class EvilServer implements NetworkNode {
         return Destination.BAD_GUY;
     }
 
-    private byte[] generateNewMac(byte[] seed, String messageExtension, int originalMessageLengthInBits) {
+    private byte[] generateNewMac(byte[] seed, byte[] messageExtension, int originalMessageLengthInBits) {
         return new SHA1(seed)
-                .digest(pad(messageExtension.getBytes(), originalMessageLengthInBits));
+                .digest(messageExtension,
+                        (messageExtension.length * 8)
+                                + originalMessageLengthInBits
+                                + (getPaddingLengthInBytes(originalMessageLengthInBits) * 8)
+                                + 64);
     }
 
+    private int getPaddingLengthInBytes(int originalMessageLengthInBits) {
+        return 56 - ((originalMessageLengthInBits / 8) % 56);
+    }
     private byte[] pad(byte[] messageExtension, int originalMessageLengthInBits) {
 
         //Pad with '0' up to length 448 bits
-        int[] padding = new int[14 - ((originalMessageLengthInBits / 32) % 14)];
-        Arrays.fill(padding, 0);
+        byte[] padding = new byte[getPaddingLengthInBytes(originalMessageLengthInBits)];
+        Arrays.fill(padding, (byte)0);
 
         //Append 64 bit length of original message
-        int[] combinedPadding = ArrayUtils.addAll(padding, originalMessageLengthInBits);
+        ByteBuffer length = ByteBuffer.allocate(8);
+        length.putInt(0);
+        length.putInt(originalMessageLengthInBits);
+        byte[] combinedPadding = ArrayUtils.addAll(padding, length.array());
 
-        //convert padding to byte array
-        ByteBuffer byteBuffer = ByteBuffer.allocate(64);
-        for (int i : combinedPadding) {
-            byteBuffer.putInt(i);
-        }
-        System.out.println(Arrays.toString(byteBuffer.array()));
-
-        return ArrayUtils.addAll(byteBuffer.array(), messageExtension);
+        return ArrayUtils.addAll(combinedPadding, messageExtension);
     }
 }

@@ -12,18 +12,19 @@ public class Bob implements NetworkNode {
     private final String SECRET_KEY = "secret.";
 
     private byte[] hash(String secretWithMessage) {
-        return new SHA1().digest(secretWithMessage.getBytes());
+        return new SHA1().digest(secretWithMessage.getBytes(), secretWithMessage.length() * 8);
     }
 
     @Override
     public void receive(Packet packet) {
         System.out.println("***");
-        System.out.println("BOB SAYS:");
-
+        System.out.println("BOB:");
         System.out.println("Verifying origin of message...");
+
         if (isMessageFromOriginalSender(packet)) {
             System.out.println("Received Message: " + packet.message);
         }
+
         System.out.println("***");
     }
 
@@ -40,7 +41,7 @@ public class Bob implements NetworkNode {
 
     private boolean isMessageFromOriginalSender(Packet packet) {
         if (Arrays.equals(hash(SECRET_KEY + packet.message), packet.mac)) {
-            System.out.println("Message is from Alice...");
+            System.out.println("Message is from Alice!");
             return true;
         } else {
             System.out.println("Message is NOT from Alice!");
