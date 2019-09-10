@@ -1,10 +1,10 @@
 package network.routing;
 
+import network.Network;
 import network.Packet;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
@@ -22,6 +22,7 @@ public class PacketRouter implements PropertyChangeListener {
             Queue<Packet> packets = (Queue<Packet>) evt.getNewValue();
             Packet packetToSend = packets.remove();
             System.out.println("Routing packet to destination: " + packetToSend.destination.toString());
+            Network.simulateTimePassing(1000);
             nodes.stream()
                     .filter(node -> node.getDestination() == packetToSend.destination)
                     .findFirst().get()

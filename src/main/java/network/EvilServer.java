@@ -1,5 +1,6 @@
 package network;
 
+import ansi.Colour;
 import hashing.SHA1;
 import network.routing.Destination;
 import network.routing.NetworkNode;
@@ -16,14 +17,14 @@ public class EvilServer implements NetworkNode {
     @Override
     public void receive(Packet packet) {
         System.out.println("***");
-
-        System.out.println("EVIL SERVER:");
-        System.out.println("Received Message: " + packet.message);
+        System.out.println(Colour.ANSI_CYAN + "EVIL SERVER:");
+        System.out.println(Colour.ANSI_BLACK + "Received Message: "
+                + Colour.ANSI_GREEN + packet.message);
 
         int originalMessageLengthInBits = (packet.message.length() + SECRET_LENGTH) * 8;
 
-        String nastyMessage = "\nAt least that's what I would say, if you weren't such an idiot! GO TO HELL BOB!";
-        System.out.println("Appending malicious content to the existing message...");
+        String nastyMessage = "\nAt least that's what I would say, if you weren't such an idiot!";
+        System.out.println(Colour.ANSI_BLACK + "Appending malicious content to the existing message...");
 
         byte[] prePaddedNastyMessage = pad(nastyMessage.getBytes(), originalMessageLengthInBits);
         byte[] message = ArrayUtils.addAll(packet.message.getBytes(), prePaddedNastyMessage);
@@ -33,6 +34,7 @@ public class EvilServer implements NetworkNode {
 
         System.out.println("Sending tampered message to Bob...");
         System.out.println("***");
+        Network.simulateTimePassing(4000);
         Packet evilPacket = new Packet(new String(message), Destination.BOB, packet.mac);
         network.takePacket(evilPacket);
     }

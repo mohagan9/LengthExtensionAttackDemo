@@ -1,5 +1,6 @@
 package network;
 
+import ansi.Colour;
 import network.routing.Destination;
 import network.routing.NetworkNode;
 
@@ -11,14 +12,16 @@ public class NaughtyServer implements NetworkNode {
     public void receive(Packet packet) {
         System.out.println("***");
 
-        System.out.println("NAUGHTY SERVER SAYS:");
-        System.out.println("Received message: " + packet.message);
+        System.out.println(Colour.ANSI_CYAN + "NAUGHTY SERVER:");
+        System.out.println(Colour.ANSI_BLACK + "Received message: "
+                + Colour.ANSI_GREEN + packet.message);
 
         String nastyMessage = "You suck Bob!";
-        System.out.println("Changing message to: " + nastyMessage);
+        System.out.println(Colour.ANSI_BLACK + "Changing message to: " + nastyMessage);
 
         System.out.println("Sending new nasty message to Bob...");
         System.out.println("***");
+        Network.simulateTimePassing(4000);
         Packet nastyPacket = new Packet(nastyMessage, Destination.BOB, packet.mac);
         network.takePacket(nastyPacket);
     }

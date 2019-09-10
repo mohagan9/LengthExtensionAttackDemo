@@ -20,20 +20,33 @@ public class Network implements Serializable {
     public Network() {
         nodes = new HashSet<>();
         packets = new PriorityQueue<>();
-
-        EvilPacketRouter evilPacketRouter = new EvilPacketRouter();
-        propertyChange.addPropertyChangeListener(evilPacketRouter);
     }
 
-    public void connect(NetworkNode node) {
+    void connect(NetworkNode node) {
         nodes.add(node);
         propertyChange.removePropertyChangeListener(packetRouter);
         packetRouter = new PacketRouter(nodes);
         propertyChange.addPropertyChangeListener(packetRouter);
     }
 
-    public void takePacket(Packet packet) {
+    void takePacket(Packet packet) {
         packets.add(packet);
         propertyChange.firePropertyChange("packets", null, packets);
+    }
+
+    public void activateEvilPacketRouter() {
+        EvilPacketRouter evilPacketRouter = new EvilPacketRouter();
+
+        propertyChange.removePropertyChangeListener(packetRouter);
+        propertyChange.addPropertyChangeListener(evilPacketRouter);
+        propertyChange.addPropertyChangeListener(packetRouter);
+    }
+
+    public static void simulateTimePassing(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

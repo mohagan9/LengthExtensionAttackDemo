@@ -1,5 +1,6 @@
 package network.routing;
 
+import network.Network;
 import network.Packet;
 
 import java.beans.PropertyChangeEvent;
@@ -16,6 +17,7 @@ public class EvilPacketRouter implements PropertyChangeListener {
             Queue<Packet> packets = (Queue<Packet>) evt.getNewValue();
             Packet packetToTamperWith = packets.remove();
             packets.add(new Packet(packetToTamperWith.message, Destination.BAD_GUY, packetToTamperWith.mac));
+            Network.simulateTimePassing(1000);
             System.out.println("Packet intercepted!");
             reRouted = true;
         }

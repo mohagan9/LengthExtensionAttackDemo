@@ -1,8 +1,9 @@
 package network;
 
+import ansi.Colour;
+import hashing.MacStrategy;
 import network.routing.Destination;
 import network.routing.NetworkNode;
-import hashing.SHA1;
 
 import java.util.Arrays;
 
@@ -10,22 +11,33 @@ public class Bob implements NetworkNode {
 
     private Network network;
     private final String SECRET_KEY = "secret.";
+    private final MacStrategy macStrategy;
 
-    private byte[] hash(String secretWithMessage) {
-        return new SHA1().digest(secretWithMessage.getBytes(), secretWithMessage.length() * 8);
+    public Bob(MacStrategy macStrategy) {
+        this.macStrategy = macStrategy;
+    }
+
+    public void sendMessage(String message, Destination destination) {
+        System.out.println("***");
+        System.out.println(Colour.ANSI_CYAN + "BOB:");
+        System.out.println(Colour.ANSI_BLACK + "Sending message onto the network...");
+        System.out.println("***");
+        Network.simulateTimePassing(2000);
+        network.takePacket(new Packet(message, destination, macStrategy.hash(SECRET_KEY, message)));
     }
 
     @Override
     public void receive(Packet packet) {
         System.out.println("***");
-        System.out.println("BOB:");
-        System.out.println("Verifying origin of message...");
+        System.out.println(Colour.ANSI_CYAN + "BOB:");
+        System.out.println(Colour.ANSI_BLACK + "Verifying origin of message...");
 
         if (isMessageFromOriginalSender(packet)) {
-            System.out.println("Received Message: " + packet.message);
+            System.out.println("Received Message: " + Colour.ANSI_GREEN + packet.message);
         }
 
-        System.out.println("***");
+        System.out.println(Colour.ANSI_BLACK + "***");
+        Network.simulateTimePassing(3000);
     }
 
     @Override
@@ -40,7 +52,7 @@ public class Bob implements NetworkNode {
     }
 
     private boolean isMessageFromOriginalSender(Packet packet) {
-        if (Arrays.equals(hash(SECRET_KEY + packet.message), packet.mac)) {
+        if (Arrays.equals(macStrategy.hash(SECRET_KEY, packet.message), packet.mac)) {
             System.out.println("Message is from Alice!");
             return true;
         } else {
