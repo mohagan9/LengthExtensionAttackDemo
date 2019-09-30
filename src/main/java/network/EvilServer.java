@@ -11,8 +11,14 @@ import java.util.Arrays;
 
 public class EvilServer implements NetworkNode {
 
-    private Network network;
     private static final int SECRET_LENGTH = 7;
+    private final Destination personToFool;
+
+    private Network network;
+
+    public EvilServer(Destination personToFool) {
+        this.personToFool = personToFool;
+    }
 
     @Override
     public void receive(Packet packet) {
@@ -32,10 +38,10 @@ public class EvilServer implements NetworkNode {
         System.out.println("Spoofing the MAC...");
         packet.mac = generateNewMac(packet.mac, nastyMessage.getBytes(), originalMessageLengthInBits);
 
-        System.out.println("Sending tampered message to Bob...");
+        System.out.println("Sending tampered message to " + personToFool.toString() + "...");
         System.out.println("***");
         Network.simulateTimePassing(4000);
-        Packet evilPacket = new Packet(new String(message), Destination.BOB, packet.mac);
+        Packet evilPacket = new Packet(new String(message), personToFool, packet.mac);
         network.takePacket(evilPacket);
     }
 

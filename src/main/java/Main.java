@@ -12,9 +12,9 @@ public class Main {
     public static void main(String[] args) {
         System.out.println(Colour.ANSI_BLACK + "Starting...");
 
-//        macExample();
+        macExample();
 //        lengthExtensionAttackExample();
-        hmacExample();
+//        hmacExample();
 
         System.out.println("\n\n\n\n\n");
     }
@@ -40,7 +40,7 @@ public class Main {
 
         Alice alice = new Alice(macStrategy);
         Bob bob = new Bob(macStrategy);
-        EvilServer evilServer = new EvilServer();
+        EvilServer evilServer = new EvilServer(Destination.BOB);
 
         alice.connectToNetwork(network);
         bob.connectToNetwork(network);
@@ -56,7 +56,7 @@ public class Main {
 
         Alice alice = new Alice(hmacStrategy);
         Bob bob = new Bob(hmacStrategy);
-        EvilServer evilServer = new EvilServer();
+        EvilServer evilServer = new EvilServer(Destination.ALICE);
 
         alice.connectToNetwork(network);
         bob.connectToNetwork(network);
