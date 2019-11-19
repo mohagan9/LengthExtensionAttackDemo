@@ -1,18 +1,12 @@
 package hashing;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class SHA1 {
-    private List<byte[]> inputDataList;
-
     private int a, b, c, d, e;
 
-    public SHA1() {
-        this.inputDataList = new ArrayList<byte[]>();
-
+    SHA1() {
         a = 1732584193;
         b = -271733879;
         c = -1732584194;
@@ -21,7 +15,6 @@ public class SHA1 {
     }
 
     public SHA1(byte[] initialSeed) {
-        this.inputDataList = new ArrayList<byte[]>();
         a = new BigInteger(Arrays.copyOfRange(initialSeed, 0, 4)).intValue();
         b = new BigInteger(Arrays.copyOfRange(initialSeed, 4, 8)).intValue();
         c = new BigInteger(Arrays.copyOfRange(initialSeed, 8, 12)).intValue();
